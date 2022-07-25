@@ -2,31 +2,41 @@
 
 pragma solidity ^0.8.7;
 
-contract FirstContract {
-    uint cedula; // Estas variables de estado se van a persistir en la BC
-    string nombre;
-    uint edad;
+contract Chat {
 
-    function setData(uint _cedula, string memory _nombre, uint _edad) public { // Si es publico, cualquier contrato puede invocar este funcion
-        cedula = _cedula; 
-        nombre = _nombre;
-        edad = _edad;
+    // Registro de usuarios, de acuerdo a su address
+    mapping(address => string) private usuarios;
+
+    struct Post {
+        uint date;
+        string mensaje;
+        string username;
+    }
+    // Registro de mensajes del chat (arreglo dinamico)
+    Post[] private mensajes; 
+
+    // Acceso a todos los mensajes almacenados
+    function messages() public view returns (Post[] memory) {
+        return (mensajes);
+    }
+    
+    // Agregado de un nuevo post
+    function addMessage(string memory _user, string memory _text) public {
+        usuarios[msg.sender] = _user; // Registra (o actualiza) el usuario segun su address
+        mensajes.push(Post(block.timestamp, _text, _user)); // Agrega un nuevo struct al arreglo
     }
 
-    function getId() public view returns (uint) { // La palabra view quiere decir que vamos a poder acceder a variables de estado
-        return cedula;
+    // Retorna el ultimo mensaje registrado
+    function getLastMessage() public view returns(string memory, string memory) {
+        Post memory p = mensajes[mensajes.length-1];
+        return (p.username, p.mensaje);
     }
 
-    function getName() public view returns (string memory) {
-        return nombre;
-    }
-
-    function getAge() public view returns (uint) {
-        return edad;
-    }
-
-    function getFullData() public view returns(uint, string memory, uint) {
-        return (cedula, nombre, edad);
-    }
-
+    /*function getLastMessages(uint8 _n) public view returns(string[] memory) {
+        string[] memory result;
+        for (uint i = 0; (i < _n) && (i < mensajes.length); i++) {
+            result[i] = mensajes[i].mensaje;
+        }
+        return result;
+    }*/
 }
